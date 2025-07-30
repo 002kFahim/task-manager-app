@@ -33,17 +33,9 @@ const loginValidation = [
   body("password").notEmpty().withMessage("Password is required"),
 ];
 
-const resetPasswordValidation = [
-  body("email")
-    .isEmail()
-    .normalizeEmail()
-    .withMessage("Please provide a valid email"),
-];
-
 // Routes
 router.post("/register", registerValidation, register);
 router.post("/login", loginValidation, login);
 router.get("/me", auth, getMe);
-router.post("/reset-password", resetPasswordValidation, resetPasswordRequest);
 
 module.exports = router;

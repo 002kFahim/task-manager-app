@@ -37,8 +37,24 @@ const DashboardLayout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header user={user} />
-      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">{children}</main>
+      <div className="relative">
+        {/* Gradient header section - limited height */}
+        <div className="h-64 bg-gradient-to-br from-teal-800 via-gray-950 to-teal-800">
+          <Header user={user} />
+
+          {/* Welcome Section */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-8">
+            <div className="text-white">
+              <p className="text-base">
+                Hi {user?.fullName?.split(" ")[0] || "User"}
+              </p>
+              <h2 className="text-2xl font-bold">Welcome to Dashboard</h2>
+            </div>
+          </div>
+        </div>
+
+        <main>{children}</main>
+      </div>
     </div>
   );
 };

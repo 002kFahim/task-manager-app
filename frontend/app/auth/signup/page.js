@@ -17,11 +17,18 @@ const schema = yup.object({
     .string()
     .required("Full name is required")
     .min(2, "Name must be at least 2 characters"),
-  email: yup.string().email("Invalid email").required("Email is required"),
+  email: yup
+    .string()
+    .email("Please enter a valid email address")
+    .required("Email is required"),
   password: yup
     .string()
     .required("Password is required")
-    .min(6, "Password must be at least 6 characters"),
+    .min(6, "Password must be at least 6 characters")
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"
+    ),
   confirmPassword: yup
     .string()
     .required("Please confirm your password")
@@ -56,30 +63,37 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Illustration */}
-      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-green-800 to-green-900 items-center justify-center p-8">
-        <div className="max-w-md">
-          <Image
-            src="/assets/images/6.png"
-            alt="Signup Illustration"
-            width={400}
-            height={400}
-            className="w-full h-auto"
-          />
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-black/20 to-transparent"></div>
+        <div className="relative z-10 flex items-center justify-center p-12 w-full">
+          <div className="max-w-lg text-center">
+            <Image
+              src="/signup/ToDo.png"
+              alt="Signup Illustration"
+              width={450}
+              height={350}
+              className="w-full h-auto drop-shadow-2xl"
+            />
+          </div>
         </div>
+        <div className="absolute top-20 left-20 w-32 h-32 bg-emerald-500/10 rounded-full blur-xl"></div>
+        <div className="absolute bottom-32 right-16 w-24 h-24 bg-blue-500/10 rounded-full blur-lg"></div>
       </div>
 
       {/* Right side - Signup Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-white">
-        <div className="max-w-md w-full space-y-8">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">Sign Up</h2>
-            <p className="mt-2 text-gray-600">
-              Create your account to get started.
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 bg-gray-50">
+        <div className="max-w-md w-full">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">Sign Up</h1>
+            <p className="text-gray-500 text-lg">
+              To Create Account, Please Fill the Form Below
             </p>
           </div>
 
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          {/* Form */}
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+            {/* Full Name Input */}
             <Input
               label="Full Name"
               type="text"
@@ -89,44 +103,66 @@ export default function SignupPage() {
               {...register("fullName")}
             />
 
+            {/* Email Input */}
             <Input
               label="Email Address"
               type="email"
-              placeholder="Enter your email"
+              placeholder="Enter your email address"
               required
               error={errors.email?.message}
               {...register("email")}
             />
 
+            {/* Password Input */}
             <Input
               label="Password"
               type="password"
-              placeholder="Enter your password"
+              placeholder="******************"
               required
+              showPasswordToggle={true}
               error={errors.password?.message}
               {...register("password")}
             />
 
+            {/* Confirm Password Input */}
             <Input
               label="Confirm Password"
               type="password"
-              placeholder="Confirm your password"
+              placeholder="Retype password"
               required
+              showPasswordToggle={true}
               error={errors.confirmPassword?.message}
               {...register("confirmPassword")}
             />
 
-            <Button type="submit" loading={loading} className="w-full">
+            {/* Sign Up Button */}
+            <Button
+              type="submit"
+              loading={loading}
+              variant="primary"
+              className="w-full mt-6"
+            >
               Sign Up
             </Button>
 
-            <div className="text-center">
+            {/* Divider */}
+            <div className="relative mt-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-gray-50 text-gray-500">Or</span>
+              </div>
+            </div>
+
+            {/* Login link */}
+            <div className="text-center mt-4">
               <span className="text-gray-600">Already have an account? </span>
               <Link
                 href="/auth/login"
-                className="text-green-600 hover:text-green-500 font-medium"
+                className="text-emerald-600 hover:text-emerald-700 font-semibold"
               >
-                Login
+                Log In
               </Link>
             </div>
           </form>

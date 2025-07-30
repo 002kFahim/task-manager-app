@@ -126,44 +126,8 @@ const getMe = async (req, res, next) => {
   }
 };
 
-// @desc    Reset password request
-// @route   POST /api/auth/reset-password
-// @access  Public
-const resetPasswordRequest = async (req, res, next) => {
-  try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({
-        success: false,
-        message: "Validation failed",
-        errors: errors.array(),
-      });
-    }
-
-    const { email } = req.body;
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found with this email",
-      });
-    }
-
-    // In a real application, you would send an email with reset link
-    // For now, we'll just return a success message
-    res.json({
-      success: true,
-      message: "Password reset instructions sent to your email",
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
 module.exports = {
   register,
   login,
   getMe,
-  resetPasswordRequest,
 };

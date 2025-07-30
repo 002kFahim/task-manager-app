@@ -1,6 +1,6 @@
 const app = require("./src/app");
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 5000;
 
 // For Vercel deployment
 if (process.env.NODE_ENV !== "production") {

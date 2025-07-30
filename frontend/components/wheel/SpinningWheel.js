@@ -1,191 +1,202 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import Button from "@/components/ui/Button";
 
-const SpinningWheel = ({ onTaskSelected, categories = [] }) => {
+const SpinningWheel = ({ onTaskSelected, categories }) => {
   const [isSpinning, setIsSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const wheelRef = useRef(null);
 
-  // Default categories with colors matching the Figma design
-  const wheelCategories =
-    categories.length > 0
-      ? categories
-      : [
-          { name: "Work", color: "#3B82F6", textColor: "#FFFFFF" },
-          { name: "Personal", color: "#8B5CF6", textColor: "#FFFFFF" },
-          { name: "Health", color: "#10B981", textColor: "#FFFFFF" },
-          { name: "Learning", color: "#F59E0B", textColor: "#FFFFFF" },
-          { name: "Entertainment", color: "#EF4444", textColor: "#FFFFFF" },
-          { name: "Other", color: "#6B7280", textColor: "#FFFFFF" },
-        ];
+  const defaultCategories = [
+    { name: "Work", color: "#3B82F6", textColor: "#FFFFFF" },
+    { name: "Personal", color: "#8B5CF6", textColor: "#FFFFFF" },
+    { name: "Health", color: "#10B981", textColor: "#FFFFFF" },
+    { name: "Learning", color: "#F59E0B", textColor: "#FFFFFF" },
+    { name: "Entertainment", color: "#EF4444", textColor: "#FFFFFF" },
+    { name: "Nature", color: "#059669", textColor: "#FFFFFF" },
+    { name: "Family", color: "#7C3AED", textColor: "#FFFFFF" },
+    { name: "Friends", color: "#DC2626", textColor: "#FFFFFF" },
+    { name: "Art and Craft", color: "#EA580C", textColor: "#FFFFFF" },
+    { name: "Meditation", color: "#0891B2", textColor: "#FFFFFF" },
+  ];
 
+  const wheelCategories = categories || defaultCategories;
   const segmentAngle = 360 / wheelCategories.length;
 
-  const spinWheel = () => {
+  const handleSpin = () => {
     if (isSpinning) return;
 
     setIsSpinning(true);
 
-    // Generate random rotation (multiple full rotations + random position)
-    const minSpins = 5;
-    const maxSpins = 8;
-    const spins = Math.random() * (maxSpins - minSpins) + minSpins;
-    const finalRotation = rotation + spins * 360 + Math.random() * 360;
+    // Generate random spin (multiple full rotations + random angle)
+    const spins = Math.floor(Math.random() * 5) + 5; // 5-9 full rotations
+    const finalAngle = Math.random() * 360;
+    const totalRotation = rotation + spins * 360 + finalAngle;
 
-    setRotation(finalRotation);
+    setRotation(totalRotation);
 
-    // Calculate which segment was selected
+    // Determine which segment was selected
     setTimeout(() => {
-      const normalizedRotation = (360 - (finalRotation % 360)) % 360;
-      const selectedIndex = Math.floor(normalizedRotation / segmentAngle);
+      // Calculate the final position relative to the pointer (top of wheel)
+      const normalizedAngle = (360 - (totalRotation % 360)) % 360;
+      const selectedIndex = Math.floor(normalizedAngle / segmentAngle);
       const selectedCategory = wheelCategories[selectedIndex];
 
       setIsSpinning(false);
       onTaskSelected(selectedCategory.name);
-    }, 3000); // 3 seconds spin duration
+    }, 3000); // 3 second spin duration
   };
 
-  const createSegmentPath = (index) => {
-    const startAngle = (index * segmentAngle - 90) * (Math.PI / 180);
-    const endAngle = ((index + 1) * segmentAngle - 90) * (Math.PI / 180);
-    const radius = 120;
-    const centerX = 150;
-    const centerY = 150;
+  // Generate wheel segments
+  const generateSegments = () => {
+    return wheelCategories.map((category, index) => {
+      const startAngle = index * segmentAngle;
+      const endAngle = (index + 1) * segmentAngle;
+      const midAngle = (startAngle + endAngle) / 2;
 
-    const x1 = centerX + radius * Math.cos(startAngle);
-    const y1 = centerY + radius * Math.sin(startAngle);
-    const x2 = centerX + radius * Math.cos(endAngle);
-    const y2 = centerY + radius * Math.sin(endAngle);
+      // Convert to radians for calculations
+      const startRad = (startAngle * Math.PI) / 180;
+      const endRad = (endAngle * Math.PI) / 180;
+      const midRad = (midAngle * Math.PI) / 180;
 
-    const largeArcFlag = segmentAngle > 180 ? 1 : 0;
+      const radius = 150;
+      const innerRadius = 0;
 
-    return `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2} Z`;
-  };
+      // Calculate path for the segment
+      const x1 = Math.cos(startRad) * radius;
+      const y1 = Math.sin(startRad) * radius;
+      const x2 = Math.cos(endRad) * radius;
+      const y2 = Math.sin(endRad) * radius;
 
-  const getTextPosition = (index) => {
-    const angle =
-      (index * segmentAngle + segmentAngle / 2 - 90) * (Math.PI / 180);
-    const radius = 80;
-    const centerX = 150;
-    const centerY = 150;
+      const largeArcFlag = segmentAngle > 180 ? 1 : 0;
 
-    return {
-      x: centerX + radius * Math.cos(angle),
-      y: centerY + radius * Math.sin(angle),
-    };
+      const pathData = [
+        `M 0 0`,
+        `L ${x1} ${y1}`,
+        `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
+        `Z`,
+      ].join(" ");
+
+      // Calculate text position
+      const textRadius = radius * 0.7;
+      const textX = Math.cos(midRad) * textRadius;
+      const textY = Math.sin(midRad) * textRadius;
+      const textRotation =
+        midAngle > 90 && midAngle < 270 ? midAngle + 180 : midAngle;
+
+      return (
+        <g key={index}>
+          <path
+            d={pathData}
+            fill={category.color}
+            stroke="#FFFFFF"
+            strokeWidth="2"
+          />
+          <text
+            x={textX}
+            y={textY}
+            fill={category.textColor}
+            fontSize="12"
+            fontWeight="600"
+            textAnchor="middle"
+            dominantBaseline="middle"
+            transform={`rotate(${textRotation}, ${textX}, ${textY})`}
+          >
+            {category.name}
+          </text>
+        </g>
+      );
+    });
   };
 
   return (
-    <div className="flex flex-col items-center space-y-8">
-      {/* Spinning Wheel */}
+    <div className="flex flex-col items-center space-y-6">
+      {/* Wheel Container */}
       <div className="relative">
-        {/* Pointer */}
+        {/* Pointer/Arrow */}
         <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-2 z-10">
-          <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-red-500"></div>
+          <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[25px] border-l-transparent border-r-transparent border-b-[#21D789]"></div>
         </div>
 
-        {/* Wheel Container */}
-        <div className="relative w-80 h-80 rounded-full shadow-2xl overflow-hidden">
+        {/* Wheel */}
+        <div
+          ref={wheelRef}
+          className={`transition-transform duration-[3000ms] ease-out ${
+            isSpinning ? "" : ""
+          }`}
+          style={{
+            transform: `rotate(${rotation}deg)`,
+            transformOrigin: "center center",
+          }}
+        >
           <svg
-            ref={wheelRef}
-            width="300"
-            height="300"
-            viewBox="0 0 300 300"
-            className="w-full h-full transition-transform duration-[3000ms] ease-out"
-            style={{
-              transform: `rotate(${rotation}deg)`,
-              transformOrigin: "150px 150px",
-            }}
+            width="320"
+            height="320"
+            viewBox="-160 -160 320 320"
+            className="drop-shadow-lg"
           >
-            {wheelCategories.map((category, index) => {
-              const textPos = getTextPosition(index);
-              return (
-                <g key={index}>
-                  {/* Segment */}
-                  <path
-                    d={createSegmentPath(index)}
-                    fill={category.color}
-                    stroke="#FFFFFF"
-                    strokeWidth="2"
-                  />
-
-                  {/* Text */}
-                  <text
-                    x={textPos.x}
-                    y={textPos.y}
-                    fill={category.textColor}
-                    fontSize="14"
-                    fontWeight="bold"
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    transform={`rotate(${
-                      index * segmentAngle + segmentAngle / 2
-                    }, ${textPos.x}, ${textPos.y})`}
-                  >
-                    {category.name}
-                  </text>
-                </g>
-              );
-            })}
-
-            {/* Center Circle */}
+            {/* Outer ring */}
             <circle
-              cx="150"
-              cy="150"
+              cx="0"
+              cy="0"
+              r="160"
+              fill="#DC2626"
+              stroke="#FFFFFF"
+              strokeWidth="8"
+            />
+
+            {/* Segments */}
+            <g transform="rotate(-90)">{generateSegments()}</g>
+
+            {/* Center circle */}
+            <circle
+              cx="0"
+              cy="0"
               r="20"
               fill="#FFFFFF"
               stroke="#E5E7EB"
               strokeWidth="2"
             />
-          </svg>
-        </div>
 
-        {/* Center Button */}
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <button
-            onClick={spinWheel}
-            disabled={isSpinning}
-            className="w-16 h-16 bg-white rounded-full shadow-lg border-2 border-gray-200 flex items-center justify-center hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg
-              className={`w-8 h-8 text-gray-600 ${
-                isSpinning ? "animate-spin" : ""
-              }`}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+            {/* Center dots for decoration */}
+            {[...Array(8)].map((_, i) => (
+              <circle
+                key={i}
+                cx={Math.cos((i * 45 * Math.PI) / 180) * 12}
+                cy={Math.sin((i * 45 * Math.PI) / 180) * 12}
+                r="2"
+                fill="#9CA3AF"
               />
-            </svg>
-          </button>
+            ))}
+          </svg>
         </div>
       </div>
 
       {/* Spin Button */}
-      <Button
-        onClick={spinWheel}
-        loading={isSpinning}
+      <button
+        onClick={handleSpin}
         disabled={isSpinning}
-        size="lg"
-        className="px-8 py-3 text-lg font-semibold"
+        className={`px-8 py-3 rounded-lg font-semibold text-white transition-all duration-200 flex items-center space-x-2 ${
+          isSpinning
+            ? "bg-gray-400 cursor-not-allowed"
+            : "bg-[#21D789] hover:bg-[#1DBE7A] hover:shadow-lg transform hover:scale-105"
+        }`}
       >
-        {isSpinning ? "Spinning..." : "Spin the Wheel!"}
-      </Button>
-
-      {/* Instructions */}
-      <div className="text-center max-w-md">
-        <p className="text-gray-600">
-          Spin the wheel to get a random task from your selected category. The
-          wheel will help you decide what to work on next!
-        </p>
-      </div>
+        <svg
+          className={`w-5 h-5 ${isSpinning ? "animate-spin" : ""}`}
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
+        </svg>
+        <span>{isSpinning ? "Spinning..." : "Spin"}</span>
+      </button>
     </div>
   );
 };

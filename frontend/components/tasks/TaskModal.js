@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+import CustomDropdown from "@/components/ui/CustomDropDown";
 
 const schema = yup.object({
   title: yup
@@ -15,10 +16,33 @@ const schema = yup.object({
   description: yup
     .string()
     .max(500, "Description must be less than 500 characters"),
-  category: yup.string().required("Category is required"),
-  priority: yup.string().required("Priority is required"),
-  status: yup.string().required("Status is required"),
-  dueDate: yup.string(),
+  category: yup
+    .string()
+    .required("Category is required")
+    .oneOf(
+      [
+        "Art and Craft",
+        "Work",
+        "Personal",
+        "Health",
+        "Learning",
+        "Entertainment",
+        "Nature",
+        "Family",
+        "Friends",
+        "Meditation",
+      ],
+      "Please select a valid category"
+    ),
+  status: yup
+    .string()
+    .required("Status is required")
+    .oneOf(["Pending", "In Progress", "Done"], "Please select a valid status"),
+  dueDate: yup
+    .date()
+    .required("Due date is required")
+    .nullable()
+    .typeError("Please enter a valid date"),
 });
 
 const TaskModal = ({
@@ -32,42 +56,57 @@ const TaskModal = ({
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       title: "",
       description: "",
-      category: "Other",
-      priority: "Medium",
-      status: "Pending",
-      dueDate: "",
+      category: "",
+      status: "",
+      dueDate: null,
     },
   });
 
+  const categoryOptions = [
+    "Art and Craft",
+    "Work",
+    "Personal",
+    "Health",
+    "Learning",
+    "Entertainment",
+    "Nature",
+    "Family",
+    "Friends",
+    "Meditation",
+  ];
+  const statusOptions = ["Pending", "In Progress", "Done"];
+
   useEffect(() => {
-    if (task) {
-      reset({
-        title: task.title || "",
-        description: task.description || "",
-        category: task.category || "Other",
-        priority: task.priority || "Medium",
-        status: task.status || "Pending",
-        dueDate: task.dueDate
-          ? new Date(task.dueDate).toISOString().split("T")[0]
-          : "",
-      });
-    } else {
-      reset({
-        title: "",
-        description: "",
-        category: "Other",
-        priority: "Medium",
-        status: "Pending",
-        dueDate: "",
-      });
+    if (isOpen) {
+      if (task) {
+        reset({
+          title: task.title || "",
+          description: task.description || "",
+          category: task.category || "",
+          status: task.status || "",
+          dueDate: task.dueDate
+            ? new Date(task.dueDate).toISOString().split("T")[0]
+            : "",
+        });
+      } else {
+        reset({
+          title: "",
+          description: "",
+          category: "",
+          status: "",
+          dueDate: "",
+        });
+      }
     }
-  }, [task, reset]);
+  }, [isOpen, task, reset]);
 
   const handleFormSubmit = (data) => {
     const formattedData = {
@@ -80,12 +119,12 @@ const TaskModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+      <div className="bg-white rounded-lg w-full max-w-md mx-4 p-6 shadow-xl">
+        <div className="p-4">
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-bold text-gray-900">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-lg font-semibold text-gray-900">
               {task ? "Edit Task" : "Create New Task"}
             </h2>
             <button
@@ -93,7 +132,7 @@ const TaskModal = ({
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
               <svg
-                className="w-6 h-6"
+                className="w-5 h-5"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -109,7 +148,7 @@ const TaskModal = ({
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-3">
             <Input
               label="Task Title"
               placeholder="Enter task title"
@@ -118,14 +157,14 @@ const TaskModal = ({
               {...register("title")}
             />
 
-            <div className="mb-4">
+            <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Description
               </label>
               <textarea
                 rows={3}
                 placeholder="Enter task description (optional)"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-gray-700"
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#21D789] focus:border-transparent text-black"
                 {...register("description")}
               />
               {errors.description && (
@@ -135,44 +174,21 @@ const TaskModal = ({
               )}
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Category <span className="text-red-500">*</span>
-              </label>
-              <select
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-gray-700"
-                {...register("category")}
-              >
-                <option value="Work">Work</option>
-                <option value="Personal">Personal</option>
-                <option value="Health">Health</option>
-                <option value="Learning">Learning</option>
-                <option value="Entertainment">Entertainment</option>
-                <option value="Other">Other</option>
-              </select>
-              {errors.category && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.category.message}
-                </p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Priority <span className="text-red-500">*</span>
+                  Category <span className="text-red-500">*</span>
                 </label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-gray-700"
-                  {...register("priority")}
-                >
-                  <option value="Low">Low</option>
-                  <option value="Medium">Medium</option>
-                  <option value="High">High</option>
-                </select>
-                {errors.priority && (
+                <CustomDropdown
+                  options={categoryOptions}
+                  value={watch("category")}
+                  onChange={(value) => setValue("category", value)}
+                  placeholder="Select category"
+                  defaultText="Select category"
+                />
+                {errors.category && (
                   <p className="mt-1 text-sm text-red-600">
-                    {errors.priority.message}
+                    {errors.category.message}
                   </p>
                 )}
               </div>
@@ -181,14 +197,13 @@ const TaskModal = ({
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   Status <span className="text-red-500">*</span>
                 </label>
-                <select
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 text-gray-700"
-                  {...register("status")}
-                >
-                  <option value="Pending">Pending</option>
-                  <option value="In Progress">In Progress</option>
-                  <option value="Completed">Completed</option>
-                </select>
+                <CustomDropdown
+                  options={statusOptions}
+                  value={watch("status")}
+                  onChange={(value) => setValue("status", value)}
+                  placeholder="Select status"
+                  defaultText="Select status"
+                />
                 {errors.status && (
                   <p className="mt-1 text-sm text-red-600">
                     {errors.status.message}
@@ -205,17 +220,22 @@ const TaskModal = ({
             />
 
             {/* Actions */}
-            <div className="flex space-x-3 pt-4">
+            <div className="flex space-x-2 pt-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
-                className="flex-1"
+                className="flex-1 text-sm py-2 cursor-pointer"
               >
                 Cancel
               </Button>
-              <Button type="submit" loading={loading} className="flex-1">
-                {task ? "Update Task" : "Create Task"}
+              <Button
+                type="submit"
+                variant="primary"
+                loading={loading}
+                className="flex-1 text-sm py-2 cursor-pointer"
+              >
+                {task ? "Update" : "Create"}
               </Button>
             </div>
           </form>

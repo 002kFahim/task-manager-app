@@ -2,21 +2,9 @@
 
 import React from "react";
 import Button from "@/components/ui/Button";
+import { CalendarDays } from "lucide-react";
 
 const TaskResult = ({ task, onStartTask, onSpinAgain, onClose }) => {
-  const getPriorityColor = (priority) => {
-    switch (priority) {
-      case "High":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "Medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "Low":
-        return "bg-green-100 text-green-800 border-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
   const getCategoryColor = (category) => {
     const colors = {
       Work: "bg-blue-500",
@@ -24,9 +12,54 @@ const TaskResult = ({ task, onStartTask, onSpinAgain, onClose }) => {
       Health: "bg-green-500",
       Learning: "bg-orange-500",
       Entertainment: "bg-pink-500",
+      Nature: "bg-emerald-500",
+      Family: "bg-violet-500",
+      Friends: "bg-red-500",
+      "Art and Craft": "bg-orange-600",
+      Meditation: "bg-cyan-500",
       Other: "bg-gray-500",
     };
     return colors[category] || "bg-gray-500";
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "Done":
+        return "text-[#21D789] bg-green-50 border-green-200";
+      case "In Progress":
+        return "text-[#DD9221] bg-yellow-50 border-yellow-200";
+      case "Pending":
+        return "text-[#E343E6] bg-purple-50 border-purple-200";
+      default:
+        return "text-gray-600 bg-gray-50 border-gray-200";
+    }
+  };
+
+  const getCategoryIcon = (category) => {
+    switch (category) {
+      case "Art and Craft":
+        return "🎨";
+      case "Work":
+        return "💼";
+      case "Personal":
+        return "👤";
+      case "Health":
+        return "🏥";
+      case "Learning":
+        return "📚";
+      case "Entertainment":
+        return "🎮";
+      case "Nature":
+        return "🌿";
+      case "Family":
+        return "👨‍👩‍👧‍👦";
+      case "Friends":
+        return "👥";
+      case "Meditation":
+        return "🧘";
+      default:
+        return "📝";
+    }
   };
 
   const formatDate = (dateString) => {
@@ -35,12 +68,12 @@ const TaskResult = ({ task, onStartTask, onSpinAgain, onClose }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
+    <div className="bg-white rounded-xl shadow-xl p-8 max-w-lg mx-auto border border-gray-100">
       {/* Success Icon */}
       <div className="text-center mb-6">
-        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mx-auto mb-4 shadow-sm">
           <svg
-            className="w-8 h-8 text-green-600"
+            className="w-10 h-10 text-green-600"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -54,67 +87,82 @@ const TaskResult = ({ task, onStartTask, onSpinAgain, onClose }) => {
           </svg>
         </div>
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Your Task is Ready!
+          🎯 Your Task is Ready!
         </h2>
         <p className="text-gray-600">The wheel has chosen your next task</p>
       </div>
 
-      {/* Task Details */}
-      <div className="space-y-4 mb-6">
+      {/* Task Details Card */}
+      <div className="bg-gradient-to-br from-gray-50 to-white rounded-lg p-6 mb-6 border border-gray-100 shadow-sm">
         {/* Task Title */}
-        <div className="flex items-center space-x-3">
-          <div
-            className={`w-3 h-3 rounded-full ${getCategoryColor(
-              task.category
-            )}`}
-          ></div>
-          <h3 className="text-lg font-semibold text-gray-900">{task.title}</h3>
+        <div className="flex items-start space-x-3 mb-2 ">
+          <h3 className="text-xl font-bold text-gray-900 leading-tight">
+            {task.title}
+          </h3>
         </div>
 
         {/* Task Description */}
         {task.description && (
-          <p className="text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">
-            {task.description}
-          </p>
+          <div className="mb-4">
+            <p className="text-gray-700 text-sm bg-white p-4 rounded-lg border border-gray-200 leading-relaxed">
+              {task.description}
+            </p>
+          </div>
         )}
 
         {/* Task Meta Information */}
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 mb-4">
+          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800 border border-gray-200">
+            {getCategoryIcon(task.category)} {task.category}
+          </span>
           <span
-            className={`px-2 py-1 text-xs font-medium rounded-full border ${getPriorityColor(
-              task.priority
+            className={`px-3 py-1 text-xs font-semibold rounded-full border ${getStatusColor(
+              task.status
             )}`}
           >
-            {task.priority} Priority
-          </span>
-          <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800 border border-gray-200">
-            {task.category}
+            ● {task.status}
           </span>
         </div>
 
         {/* Due Date */}
         {task.dueDate && (
-          <div className="text-sm text-gray-500">
+          <div className="flex items-center text-sm text-gray-600 bg-amber-50 p-3 rounded-lg border border-amber-200">
+            <span className="mr-1">
+              <CalendarDays />
+            </span>
             <span className="font-medium">Due: </span>
-            {formatDate(task.dueDate)}
+            <span className="ml-1 font-semibold text-amber-800">
+              {formatDate(task.dueDate)}
+            </span>
           </div>
         )}
       </div>
 
       {/* Action Buttons */}
-      <div className="space-y-3">
-        <Button onClick={onStartTask} className="w-full" size="lg">
-          Start This Task
-        </Button>
-
+      <div className="space-y-4">
         <div className="grid grid-cols-2 gap-3">
-          <Button onClick={onSpinAgain} variant="outline" className="w-full">
-            Spin Again
+          <Button
+            onClick={onSpinAgain}
+            variant="outline"
+            className="w-full border-2 border-[#21D789] text-[#21D789] hover:bg-[#21D789] hover:text-white transition-all duration-200 cursor-pointer"
+          >
+            🎲 Spin Again
           </Button>
-          <Button onClick={onClose} variant="secondary" className="w-full">
-            Maybe Later
+          <Button
+            onClick={onClose}
+            variant="secondary"
+            className="w-full bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all duration-200 cursor-pointer"
+          >
+            ⏰ Maybe Later
           </Button>
         </div>
+      </div>
+
+      {/* Motivational Message */}
+      <div className="text-center mt-6 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border border-blue-100">
+        <p className="text-sm text-gray-600 font-medium">
+          ✨ You&apos;ve got this! Take it one step at a time.
+        </p>
       </div>
     </div>
   );

@@ -25,7 +25,18 @@ const taskValidation = [
     .isLength({ max: 500 })
     .withMessage("Task description cannot exceed 500 characters"),
   body("category")
-    .isIn(["Work", "Personal", "Health", "Learning", "Entertainment", "Other"])
+    .isIn([
+      "Art and Craft",
+      "Work",
+      "Personal",
+      "Health",
+      "Learning",
+      "Entertainment",
+      "Nature",
+      "Family",
+      "Friends",
+      "Meditation",
+    ])
     .withMessage("Invalid category"),
   body("priority")
     .optional()
@@ -33,7 +44,7 @@ const taskValidation = [
     .withMessage("Invalid priority"),
   body("status")
     .optional()
-    .isIn(["Pending", "In Progress", "Completed"])
+    .isIn(["Pending", "In Progress", "Done"])
     .withMessage("Invalid status"),
   body("dueDate").optional().isISO8601().withMessage("Invalid due date format"),
 ];
@@ -51,7 +62,18 @@ const updateTaskValidation = [
     .withMessage("Task description cannot exceed 500 characters"),
   body("category")
     .optional()
-    .isIn(["Work", "Personal", "Health", "Learning", "Entertainment", "Other"])
+    .isIn([
+      "Art and Craft",
+      "Work",
+      "Personal",
+      "Health",
+      "Learning",
+      "Entertainment",
+      "Nature",
+      "Family",
+      "Friends",
+      "Meditation",
+    ])
     .withMessage("Invalid category"),
   body("priority")
     .optional()
@@ -59,7 +81,7 @@ const updateTaskValidation = [
     .withMessage("Invalid priority"),
   body("status")
     .optional()
-    .isIn(["Pending", "In Progress", "Completed"])
+    .isIn(["Pending", "In Progress", "Done"])
     .withMessage("Invalid status"),
   body("dueDate").optional().isISO8601().withMessage("Invalid due date format"),
 ];

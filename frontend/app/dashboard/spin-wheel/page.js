@@ -7,11 +7,13 @@ import SpinningWheel from "@/components/wheel/SpinningWheel";
 import TaskResult from "@/components/wheel/TaskResult";
 import NoTasks from "@/components/tasks/NoTasks";
 import Button from "@/components/ui/Button";
+import CustomDropdown from "@/components/ui/CustomDropDown";
 import { taskService } from "@/lib/tasks";
 import toast from "react-hot-toast";
+import { ClipboardList } from "lucide-react";
 
 export default function SpinWheelPage() {
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState(null); // Start with no selection
   const [selectedTask, setSelectedTask] = useState(null);
   const [showResult, setShowResult] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -19,13 +21,17 @@ export default function SpinWheelPage() {
   const router = useRouter();
 
   const categories = [
-    "All",
+    "All Tasks",
+    "Art and Craft",
     "Work",
     "Personal",
     "Health",
     "Learning",
     "Entertainment",
-    "Other",
+    "Nature",
+    "Family",
+    "Friends",
+    "Meditation",
   ];
 
   const handleCategoryChange = (category) => {
@@ -39,24 +45,28 @@ export default function SpinWheelPage() {
     try {
       setLoading(true);
 
-      // Use the category from wheel if "All" is selected, otherwise use selected category
+      // Use selected category if available, otherwise use wheel category
       const categoryToUse =
-        selectedCategory === "All" ? wheelCategory : selectedCategory;
+        selectedCategory && selectedCategory !== "All Tasks"
+          ? selectedCategory
+          : wheelCategory;
 
       const task = await taskService.getRandomTask(
-        categoryToUse === "All" ? null : categoryToUse
+        categoryToUse === "All Tasks" ? null : categoryToUse
       );
       setSelectedTask(task);
       setShowResult(true);
       setHasNoTasks(false);
     } catch (error) {
+      // Define categoryToUse again for error handling
+      const categoryToUse =
+        selectedCategory && selectedCategory !== "All Tasks"
+          ? selectedCategory
+          : wheelCategory;
+
       if (error.message.includes("No pending tasks found")) {
         setHasNoTasks(true);
-        toast.error(
-          `No pending tasks found in ${
-            selectedCategory === "All" ? wheelCategory : selectedCategory
-          } category`
-        );
+        toast.error(`No pending tasks found in ${categoryToUse} category`);
       } else {
         toast.error(error.message || "Failed to get random task");
       }
@@ -103,94 +113,147 @@ export default function SpinWheelPage() {
 
   return (
     <DashboardLayout>
-      <div className="px-4 sm:px-0">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Task Spinner
-          </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Can&apos;t decide what to work on next? Let the wheel choose for
-            you! Select a category and spin the wheel to get a random task.
-          </p>
-        </div>
+      <div className="relative -mt-20 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-white rounded-2xl shadow-2xl min-h-[700px]">
+            {/* Header Section */}
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Spin Wheel
+                </h3>
 
-        {/* Category Selection */}
-        <div className="mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4 text-center">
-            Choose a Category
-          </h2>
-          <div className="flex flex-wrap justify-center gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => handleCategoryChange(category)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selectedCategory === category
-                    ? "bg-green-500 text-white shadow-md"
-                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                }`}
-              >
-                {category}
-              </button>
-            ))}
+                {/* Category Filter Dropdown */}
+                <div className="flex items-center space-x-3">
+                  <CustomDropdown
+                    options={categories}
+                    value={selectedCategory}
+                    onChange={handleCategoryChange}
+                    placeholder="Select Task Category"
+                  />
+
+                  {/* Go to Task Button - only show when task is selected */}
+                  {showResult && selectedTask && (
+                    <button
+                      onClick={() => router.push("/dashboard")}
+                      className="px-4 py-2 bg-[#21D789] text-white rounded-lg hover:bg-emerald-600 flex items-center space-x-2 cursor-pointer transition-colors"
+                    >
+                      <span>
+                        <ClipboardList />
+                      </span>
+                      <span>Go To Task</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="p-6">
+              {showResult && selectedTask ? (
+                <div className="flex justify-center">
+                  <TaskResult
+                    task={selectedTask}
+                    onStartTask={handleStartTask}
+                    onSpinAgain={handleSpinAgain}
+                    onClose={handleClose}
+                  />
+                </div>
+              ) : hasNoTasks ? (
+                <div className="text-center">
+                  <NoTasks onCreateTask={handleCreateTask} />
+                  <div className="mt-6">
+                    <Button onClick={handleSpinAgain} variant="outline">
+                      Try Different Category
+                    </Button>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                  {/* Left side - Spinning Wheel */}
+                  <div className="flex flex-col items-center">
+                    <SpinningWheel
+                      onTaskSelected={handleTaskSelected}
+                      categories={[
+                        {
+                          name: "Work",
+                          color: "#3B82F6",
+                          textColor: "#FFFFFF",
+                        },
+                        {
+                          name: "Personal",
+                          color: "#8B5CF6",
+                          textColor: "#FFFFFF",
+                        },
+                        {
+                          name: "Health",
+                          color: "#10B981",
+                          textColor: "#FFFFFF",
+                        },
+                        {
+                          name: "Learning",
+                          color: "#F59E0B",
+                          textColor: "#FFFFFF",
+                        },
+                        {
+                          name: "Entertainment",
+                          color: "#EF4444",
+                          textColor: "#FFFFFF",
+                        },
+                        {
+                          name: "Nature",
+                          color: "#059669",
+                          textColor: "#FFFFFF",
+                        },
+                        {
+                          name: "Family",
+                          color: "#7C3AED",
+                          textColor: "#FFFFFF",
+                        },
+                        {
+                          name: "Friends",
+                          color: "#DC2626",
+                          textColor: "#FFFFFF",
+                        },
+                        {
+                          name: "Art and Craft",
+                          color: "#EA580C",
+                          textColor: "#FFFFFF",
+                        },
+                        {
+                          name: "Meditation",
+                          color: "#0891B2",
+                          textColor: "#FFFFFF",
+                        },
+                      ]}
+                    />
+
+                    <p className="text-center text-gray-600 mt-4">
+                      Spin Wheel to pick your task
+                    </p>
+                  </div>
+
+                  {/* Right side - Category Selection with CustomDropdown Style */}
+                  <div className=" rounded-xl p-6">
+                    {selectedCategory && (
+                      <div className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
+                        <p className="text-sm text-green-800">
+                          <span className="font-semibold">✅ Selected:</span>{" "}
+                          {selectedCategory}
+                        </p>
+                        <p className="text-xs text-green-600 mt-1">
+                          The wheel will pick a random task from this category
+                          when you spin.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Back to Dashboard Button */}
+            </div>
           </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="flex justify-center">
-          {showResult && selectedTask ? (
-            <TaskResult
-              task={selectedTask}
-              onStartTask={handleStartTask}
-              onSpinAgain={handleSpinAgain}
-              onClose={handleClose}
-            />
-          ) : hasNoTasks ? (
-            <div className="text-center">
-              <NoTasks onCreateTask={handleCreateTask} />
-              <div className="mt-6">
-                <Button onClick={handleSpinAgain} variant="outline">
-                  Try Different Category
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="w-full max-w-lg">
-              <SpinningWheel
-                onTaskSelected={handleTaskSelected}
-                categories={[
-                  { name: "Work", color: "#3B82F6", textColor: "#FFFFFF" },
-                  { name: "Personal", color: "#8B5CF6", textColor: "#FFFFFF" },
-                  { name: "Health", color: "#10B981", textColor: "#FFFFFF" },
-                  { name: "Learning", color: "#F59E0B", textColor: "#FFFFFF" },
-                  {
-                    name: "Entertainment",
-                    color: "#EF4444",
-                    textColor: "#FFFFFF",
-                  },
-                  { name: "Other", color: "#6B7280", textColor: "#FFFFFF" },
-                ]}
-              />
-
-              {/* Selected Category Display */}
-              <div className="text-center mt-6">
-                <p className="text-gray-600">
-                  Selected Category:{" "}
-                  <span className="font-semibold text-green-600">
-                    {selectedCategory}
-                  </span>
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Back to Dashboard */}
-        <div className="text-center mt-12">
-          <Button variant="outline" onClick={() => router.push("/dashboard")}>
-            ← Back to Dashboard
-          </Button>
         </div>
       </div>
     </DashboardLayout>

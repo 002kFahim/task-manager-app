@@ -1,74 +1,119 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
+import React, { useState, useEffect, useRef } from "react";
 import { authService } from "@/lib/auth";
-import Button from "@/components/ui/Button";
+import {
+  ChevronDown,
+  ChevronUp,
+  Timer,
+  ClipboardList,
+  ShipWheel,
+  CircleUser,
+} from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const Header = ({ user }) => {
+  const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
   const handleLogout = () => {
     authService.logout();
   };
 
+  const handleResetPassword = () => {
+    router.push("/auth/reset-password");
+  };
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   return (
-    <header className="bg-gradient-to-r from-green-800 to-green-900 text-white shadow-lg">
+    <header className="relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          {/* Logo/Brand */}
-          <div className="flex items-center">
+          {/* Logo */}
+          <div className="flex items-center text-white">
+            <div className="w-6 h-6 mr-3">
+              <Timer />
+            </div>
             <h1 className="text-xl font-bold">Tasko</h1>
           </div>
 
           {/* Navigation */}
-          <nav className="hidden md:flex space-x-8">
+          <nav className="hidden md:flex space-x-8 text-white">
             <a
               href="/dashboard"
-              className="hover:text-green-200 transition-colors"
+              className="flex items-center space-x-2 hover:text-[#21D789] transition-colors"
             >
-              Dashboard
-            </a>
-            <a
-              href="/dashboard/tasks"
-              className="hover:text-green-200 transition-colors"
-            >
-              All Tasks
+              <ClipboardList />
+              <span>Task List</span>
             </a>
             <a
               href="/dashboard/spin-wheel"
-              className="hover:text-green-200 transition-colors"
+              className="flex items-center space-x-2 hover:text-[#21D789] transition-colors"
             >
-              Spin Wheel
+              <ShipWheel />
+              <span>Spin</span>
             </a>
           </nav>
 
-          {/* User Menu */}
-          <div className="flex items-center space-x-4">
-            {/* User Avatar/Profile Image */}
-            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-              <Image
-                src="/assets/images/7.png"
-                alt="User Avatar"
-                width={32}
-                height={32}
-                className="w-full h-full rounded-full object-cover"
-              />
-            </div>
+          {/* Mobile menu button */}
+          <div className="md:hidden flex items-center">
+            <button className="text-white focus:outline-none">
+              <ChevronDown className="w-6 h-6" />
+            </button>
+          </div>
 
-            {/* User Info */}
-            <div className="hidden sm:block">
-              <p className="text-sm font-medium">{user?.fullName || "User"}</p>
-              <p className="text-xs text-green-200">{user?.email}</p>
-            </div>
+          {/* User Menu Dropdown */}
+          <div
+            className="relative hidden md:flex items-center space-x-3 text-white"
+            ref={dropdownRef}
+          >
+            <CircleUser />
+            <span className="font-medium">{user?.fullName || "User"}</span>
 
-            {/* Logout Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleLogout}
-              className="border-white text-white hover:bg-white hover:text-green-800"
+            {/* Dropdown Toggle */}
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="flex items-center focus:outline-none"
             >
-              Logout
-            </Button>
+              {menuOpen ? (
+                <ChevronUp className="w-4 h-4 ml-1 transition-transform duration-200" />
+              ) : (
+                <ChevronDown className="w-4 h-4 ml-1 transition-transform duration-200" />
+              )}
+            </button>
+
+            {/* Dropdown Menu */}
+            <div
+              className={`absolute right-0 top-10 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-lg overflow-hidden transform transition-all duration-200 ${
+                menuOpen
+                  ? "opacity-100 scale-100"
+                  : "opacity-0 scale-95 pointer-events-none"
+              }`}
+            >
+              <button
+                onClick={handleResetPassword}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
+              >
+                Reset Password
+              </button>
+              <button
+                onClick={handleLogout}
+                className="block w-full text-left px-4 py-2 hover:bg-gray-100 cursor-pointer transition-colors"
+              >
+                Logout
+              </button>
+            </div>
           </div>
         </div>
       </div>
