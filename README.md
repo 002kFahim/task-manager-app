@@ -93,11 +93,13 @@ npm install
 
 ### Create .env file in backend directory
 
+```env
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
+```
 
 ### Start development server
 
@@ -115,7 +117,9 @@ npm install
 
 ### Create .env.local file in frontend directory
 
+```env
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
+```
 
 ### Start development server
 
