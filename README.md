@@ -83,15 +83,15 @@ frontend/
 
 ### Backend Setup
 
-# Navigate to backend directory
+### Navigate to backend directory
 
 cd backend
 
-# Install dependencies
+### Install dependencies
 
 npm install
 
-# Create .env file in backend directory
+### Create .env file in backend directory
 
 PORT=5000
 MONGODB_URI=your_mongodb_connection_string
@@ -99,28 +99,28 @@ JWT_SECRET=your_jwt_secret
 NODE_ENV=development
 FRONTEND_URL=http://localhost:3000
 
-# Start development server
+### Start development server
 
 npm run dev
 
 ### Frontend Setup
 
-# Navigate to frontend directory
+### Navigate to frontend directory
 
 cd frontend
 
-# Install dependencies
+### Install dependencies
 
 npm install
 
-# Create .env.local file in frontend directory
+### Create .env.local file in frontend directory
 
 NEXT_PUBLIC_API_URL=http://localhost:5000/api
 
-# Start development server
+### Start development server
 
 npm run dev
 
-# Now open your browser and navigate to:
+### Now open your browser and navigate to:
 
 http://localhost:3000
