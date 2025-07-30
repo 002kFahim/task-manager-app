@@ -17,7 +17,28 @@ This application allows users to create, manage, and organize tasks with feature
 
 ---
 
-<pre><code>## Project Structure ### Backend ``` backend/ ├── server.js # Entry point for the server ├── src/ │ ├── app.js # Express application setup │ ├── config/ # Database and other configurations │ ├── controllers/ # Request handlers │ ├── middleware/ # Custom middleware │ ├── models/ # Database models │ └── routes/ # API routes ``` ### Frontend ``` frontend/ ├── app/ # Next.js app directory │ ├── auth/ # Authentication pages │ ├── dashboard/ # Dashboard and task pages │ └── page.js # Home page ├── components/ # Reusable UI components ├── contexts/ # React context providers ├── lib/ # Utility functions and API clients └── public/ # Static assets ``` </code></pre>
+## 📂 Project Structure
+
+```
+backend/
+├── server.js                # Entry point for the server
+├── src/
+│   ├── app.js               # Express application setup
+│   ├── config/              # Database configurations
+│   ├── controllers/         # Request handlers
+│   ├── middleware/          # Custom middleware
+│   ├── models/              # Database models
+│   └── routes/              # API routes
+frontend/
+├── app/
+│   ├── auth/                # Auth pages
+│   ├── dashboard/           # Dashboard pages
+│   └── page.js              # Home page
+├── components/              # UI components
+├── contexts/                # React contexts
+├── lib/                     # Utilities
+└── public/                  # Static assets
+```
 
 ---
 
