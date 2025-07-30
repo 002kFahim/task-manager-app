@@ -85,11 +85,15 @@ frontend/
 
 ### Navigate to backend directory
 
+```bash
 cd backend
+```
 
 ### Install dependencies
 
+```bash
 npm install
+```
 
 ### Create .env file in backend directory
 
@@ -103,17 +107,23 @@ FRONTEND_URL=http://localhost:3000
 
 ### Start development server
 
+```bash
 npm run dev
+```
 
 ### Frontend Setup
 
 ### Navigate to frontend directory
 
+```bash
 cd frontend
+```
 
 ### Install dependencies
 
+```bash
 npm install
+```
 
 ### Create .env.local file in frontend directory
 
@@ -123,7 +133,9 @@ NEXT_PUBLIC_API_URL=http://localhost:5000/api
 
 ### Start development server
 
+```bash
 npm run dev
+```
 
 ### Now open your browser and navigate to:
 
